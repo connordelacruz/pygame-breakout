@@ -63,8 +63,9 @@ while running:
     # Drawing ------------------------------------------------------------------
     # Background
     screen.fill(C_BG)
-    # UI
+    # UI border
     pygame.draw.line(screen, C_UI, [0, 38], [800, 38], 2)
+    # UI text
     score_text = ui_font.render(f'Score: {score}', 1, C_UI)
     lives_text = ui_font.render(f'Lives: {lives}', 1, C_UI)
     screen.blit(score_text, POS_SCORE)
