@@ -19,12 +19,24 @@ BRICK_ROW_COLORS = [
 # UI
 C_UI = Colors.WHITE
 
+# Game Configs -----------------------------------------------------------------
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+FPS = 60
+
+# Object Configs ---------------------------------------------------------------
+# Paddle
+PADDLE_SPEED = 5
+PADDLE_WIDTH = 100
+PADDLE_HEIGHT = 10
+
 # Coordinates ------------------------------------------------------------------
+# UI
 POS_SCORE = (20, 10)
 POS_LIVES = (650, 10)
+# Paddle
+POS_PADDLE_START = ((WINDOW_WIDTH - PADDLE_WIDTH) / 2, 560)
 
-# Misc -------------------------------------------------------------------------
-FPS = 60
 
 # GLOBALS ======================================================================
 # Game Stats -------------------------------------------------------------------
@@ -42,8 +54,7 @@ sprites = pygame.sprite.Group()
 # PYGAME SETUP =================================================================
 
 # Window -----------------------------------------------------------------------
-size = (800, 600)
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption('Breakout')
 
 # Clock ------------------------------------------------------------------------
@@ -52,9 +63,7 @@ clock = pygame.time.Clock()
 # Game Objects -----------------------------------------------------------------
 # Paddle
 paddle = Paddle(C_PADDLE, 100, 10)
-# TODO: create Paddle.set_pos()
-paddle.rect.x = 350
-paddle.rect.y = 560
+paddle.set_pos(POS_PADDLE_START)
 sprites.add(paddle)
 
 
@@ -67,6 +76,13 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+    # Input Handlers -----------------------------------------------------------
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        paddle.move_left(PADDLE_SPEED)
+    if keys[pygame.K_RIGHT]:
+        paddle.move_right(PADDLE_SPEED)
+
     # Game Logic ---------------------------------------------------------------
     sprites.update()
 
@@ -74,6 +90,7 @@ while running:
     # Background
     screen.fill(C_BG)
     # UI border and text
+    # TODO: extract coords
     pygame.draw.line(screen, C_UI, [0, 38], [800, 38], 2)
     score_text = ui_font.render(f'Score: {score}', 1, C_UI)
     lives_text = ui_font.render(f'Lives: {lives}', 1, C_UI)
