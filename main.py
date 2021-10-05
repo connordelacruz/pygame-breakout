@@ -3,8 +3,10 @@ import pygame
 pygame.init()
 from colors import Colors
 from paddle import Paddle
+from ball import Ball
 
 
+# TODO group sections by component (UI, paddle, ball, etc)
 # CONSTANTS ====================================================================
 # Derived Colors ---------------------------------------------------------------
 C_BG = Colors.DARK_BLUE
@@ -34,6 +36,7 @@ PADDLE_HEIGHT = 10
 # UI
 POS_SCORE = (20, 10)
 POS_LIVES = (650, 10)
+UI_LINE_Y = 38
 # Paddle
 POS_PADDLE_START = ((WINDOW_WIDTH - PADDLE_WIDTH) / 2, 560)
 
@@ -65,6 +68,13 @@ clock = pygame.time.Clock()
 paddle = Paddle(C_PADDLE, 100, 10)
 paddle.set_pos(POS_PADDLE_START)
 sprites.add(paddle)
+# Ball
+# TODO constants
+ball = Ball(Colors.WHITE, 10, 10)
+ball.set_pos((345, 560))
+# So ball doesn't pass thru UI
+ball.set_playfield_limits(min_y=UI_LINE_Y)
+sprites.add(ball)
 
 
 # MAIN LOOP ====================================================================
@@ -90,8 +100,7 @@ while running:
     # Background
     screen.fill(C_BG)
     # UI border and text
-    # TODO: extract coords
-    pygame.draw.line(screen, C_UI, [0, 38], [800, 38], 2)
+    pygame.draw.line(screen, C_UI, [0, UI_LINE_Y], [WINDOW_WIDTH, UI_LINE_Y], 2)
     score_text = ui_font.render(f'Score: {score}', 1, C_UI)
     lives_text = ui_font.render(f'Lives: {lives}', 1, C_UI)
     screen.blit(score_text, POS_SCORE)
