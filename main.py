@@ -95,6 +95,9 @@ while running:
 
     # Game Logic ---------------------------------------------------------------
     sprites.update()
+    # Paddle/ball collision
+    if pygame.sprite.collide_mask(ball, paddle):
+        ball.bounce()
 
     # Drawing ------------------------------------------------------------------
     # Background

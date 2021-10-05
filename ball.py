@@ -18,6 +18,7 @@ class Ball(pygame.sprite.Sprite):
         self.max_y = self.screen_height - height
 
         # Randomize initial velocity
+        # TODO: i think there's some odd behavior with randomness like this, play around with it
         self.velocity = [randint(4, 8), randint(-8, 8)]
 
         # Initialize self.image
@@ -48,9 +49,16 @@ class Ball(pygame.sprite.Sprite):
         self.rect.x += self.velocity[0]
         self.rect.y += self.velocity[1]
         # Bounce off the walls
-        # TODO equal to or no equal to
         if self.rect.x >= self.max_x or self.rect.x <= self.min_x:
             self.velocity[0] *= -1
-        if self.rect.y > self.max_y or self.rect.y < self.min_y:
+        if self.rect.y >= self.max_y or self.rect.y <= self.min_y:
             self.velocity[1] *= -1
+
+    def bounce(self):
+        # Back it up TODO: necessary?
+        self.rect.x -= self.velocity[0]
+        self.rect.y -= self.velocity[1]
+        # Flip y velocity n randomize x
+        self.velocity[0] = randint(-8, 8)
+        self.velocity[1] *= -1
 
