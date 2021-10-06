@@ -4,6 +4,7 @@ pygame.init()
 from colors import Colors
 from paddle import Paddle
 from ball import Ball
+from brick import Brick
 
 
 # TODO group sections by component (UI, paddle, ball, etc)
@@ -12,13 +13,9 @@ from ball import Ball
 C_BG = Colors.DARK_BLUE
 C_PADDLE = Colors.LIGHT_BLUE
 C_BALL = Colors.WHITE
-# Brick colors, from top row to bottom
-BRICK_ROW_COLORS = [
-    Colors.RED,
-    Colors.ORANGE,
-    Colors.YELLOW,
-]
-# UI
+C_BRICK_TOP = Colors.RED
+C_BRICK_MID = Colors.ORANGE
+C_BRICK_BOT = Colors.YELLOW
 C_UI = Colors.WHITE
 
 # Game Configs -----------------------------------------------------------------
@@ -75,6 +72,23 @@ ball.set_pos((345, 560))
 # So ball doesn't pass thru UI
 ball.set_playfield_limits(min_y=UI_LINE_Y)
 sprites.add(ball)
+# Bricks
+bricks = pygame.sprite.Group()
+# TODO constants
+for i in range(7):
+    brick = Brick(C_BRICK_TOP, 80, 30)
+    brick.set_pos((60 + i * 100, 60))
+    bricks.add(brick)
+for i in range(7):
+    brick = Brick(C_BRICK_MID, 80, 30)
+    brick.set_pos((60 + i * 100, 100))
+    bricks.add(brick)
+for i in range(7):
+    brick = Brick(C_BRICK_BOT, 80, 30)
+    brick.set_pos((60 + i * 100, 140))
+    bricks.add(brick)
+sprites.add(bricks)
+
 
 
 # MAIN LOOP ====================================================================
@@ -95,9 +109,16 @@ while running:
 
     # Game Logic ---------------------------------------------------------------
     sprites.update()
+    # TODO handle lives
     # Paddle/ball collision
     if pygame.sprite.collide_mask(ball, paddle):
         ball.bounce()
+    # Brick/ball collision
+    for brick in pygame.sprite.spritecollide(ball, bricks, False):
+        ball.bounce()
+        score += 1
+        brick.kill()
+    # TODO: if len(bricks) == 0, end game
 
     # Drawing ------------------------------------------------------------------
     # Background
