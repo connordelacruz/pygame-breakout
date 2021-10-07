@@ -1,34 +1,35 @@
+import math
 from random import randint
 import pygame
 from colors import Colors
 
 
-# TODO extract common to class
 class Ball(pygame.sprite.Sprite):
     """Ball object."""
 
-    def __init__(self, color, width, height):
+    # TODO take min/max x/y, starting position here
+    def __init__(self, color, size):
         super().__init__()
 
         # Keep track of screen borders for position calulations
         self.screen_width, self.screen_height = pygame.display.get_surface().get_size()
         self.min_x = 0
-        self.max_x = self.screen_width - width
+        self.max_x = self.screen_width - size
         self.min_y = 0
-        self.max_y = self.screen_height - height
+        self.max_y = self.screen_height - size
 
-        # Randomize initial velocity
-        # TODO: i think there's some odd behavior with randomness like this, play around with it
-        # TODO: maybe use direction instead for flexibility? http://programarcadegames.com/python_examples/show_file.php?file=breakout_simple.py
-        self.velocity = [randint(4, 8), randint(-8, 8)]
+        # TODO: parameterize
+        # Speed and direction
+        self.speed = 8
+        self.direction = 200
 
         # Initialize self.image
-        self.image = pygame.Surface([width, height])
+        self.image = pygame.Surface([size, size])
         self.image.fill(Colors.BLACK)
         self.image.set_colorkey(Colors.BLACK)
 
         # Draw ball
-        pygame.draw.rect(self.image, color, [0, 0, width, height])
+        pygame.draw.rect(self.image, color, [0, 0, size, size])
         self.rect = self.image.get_rect()
 
     def set_pos(self, coords):
@@ -46,22 +47,35 @@ class Ball(pygame.sprite.Sprite):
         if max_y is not None:
             self.max_y = max_y
 
+    def h_bounce(self, target_y, diff=0):
+        """Bounce off horizontal surface"""
+        # TODO doc params
+        self.direction = (180 - self.direction) % 360
+        self.direction -= diff
+        # TODO: self.rect.y = target_y
+
+    def v_bounce(self, target_x):
+        """Bounce off vertical surface"""
+        # TODO doc params
+        self.direction = (360 - self.direction) % 360
+        # TODO: self.rect.x = target_x
+
     def update(self):
         """Returns True if we hit the bottom"""
-        self.rect.x += self.velocity[0]
-        self.rect.y += self.velocity[1]
+        hit_bottom = False
+        rad = math.radians(self.direction)
+        # Calculate new position
+        self.rect.x += self.speed * math.sin(rad)
+        self.rect.y -= self.speed * math.cos(rad)
         # Bounce off the walls
-        if self.rect.x >= self.max_x or self.rect.x <= self.min_x:
-            self.velocity[0] *= -1
-        if self.rect.y >= self.max_y or self.rect.y <= self.min_y:
-            self.velocity[1] *= -1
-        return self.rect.y >= self.max_y
-
-    def bounce(self):
-        # Back it up TODO: necessary?
-        self.rect.x -= self.velocity[0]
-        self.rect.y -= self.velocity[1]
-        # Flip y velocity n randomize x
-        self.velocity[0] = randint(-8, 8)
-        self.velocity[1] *= -1
+        if self.rect.x >= self.max_x:
+            self.v_bounce(self.max_x - 1)
+        if self.rect.x <= self.min_x:
+            self.v_bounce(self.min_x + 1)
+        if self.rect.y >= self.max_y:
+            self.h_bounce(self.max_y - 1)
+            hit_bottom = True
+        if self.rect.y <= self.min_y:
+            self.h_bounce(self.min_y + 1)
+        return hit_bottom
 

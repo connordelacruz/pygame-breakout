@@ -18,9 +18,10 @@ C_BG = Colors.DARK_BLUE
 PADDLE_WIDTH = 100
 PADDLE_HEIGHT = 10
 POS_PADDLE_START = ((WINDOW_WIDTH - PADDLE_WIDTH) / 2, WINDOW_HEIGHT - 40)
-PADDLE_SPEED = 5
+PADDLE_SPEED = 8
 C_PADDLE = Colors.LIGHT_BLUE
 # Ball -------------------------------------------------------------------------
+BALL_SIZE = 10
 C_BALL = Colors.WHITE
 # Bricks -----------------------------------------------------------------------
 C_BRICK_TOP = Colors.RED
@@ -51,7 +52,7 @@ paddle.set_pos(POS_PADDLE_START)
 sprites.add(paddle)
 # Ball
 # TODO constants
-ball = Ball(Colors.WHITE, 10, 10)
+ball = Ball(Colors.WHITE, BALL_SIZE)
 ball.set_pos((345, 560))
 # So ball doesn't pass thru UI
 ball.set_playfield_limits(min_y=UI_LINE_Y + UI_LINE_STROKE)
@@ -108,10 +109,12 @@ while running:
         # TODO: move ball to starting position after pause
     # Paddle/ball collision
     if pygame.sprite.collide_mask(ball, paddle):
-        ball.bounce()
+        # TODO move width and height to paddle (allow for powerups)
+        diff = (paddle.rect.x + PADDLE_WIDTH / 2) - (ball.rect.x + BALL_SIZE / 2)
+        ball.h_bounce(paddle.rect.y - 1, diff)
     # Brick/ball collision
     for brick in pygame.sprite.spritecollide(ball, bricks, False):
-        ball.bounce()
+        ball.h_bounce(brick.rect.y + 1)
         score_manager.add_points()
         brick.kill()
     if len(bricks) == 0:
