@@ -11,5 +11,4 @@ class ScoreManager:
 
     def lose_life(self):
         self.lives -= 1
-        # TODO: handle game over?
 

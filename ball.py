@@ -19,6 +19,7 @@ class Ball(pygame.sprite.Sprite):
 
         # Randomize initial velocity
         # TODO: i think there's some odd behavior with randomness like this, play around with it
+        # TODO: maybe use direction instead for flexibility? http://programarcadegames.com/python_examples/show_file.php?file=breakout_simple.py
         self.velocity = [randint(4, 8), randint(-8, 8)]
 
         # Initialize self.image
