@@ -46,6 +46,7 @@ class Ball(pygame.sprite.Sprite):
             self.max_y = max_y
 
     def update(self):
+        """Returns True if we hit the bottom"""
         self.rect.x += self.velocity[0]
         self.rect.y += self.velocity[1]
         # Bounce off the walls
@@ -53,6 +54,7 @@ class Ball(pygame.sprite.Sprite):
             self.velocity[0] *= -1
         if self.rect.y >= self.max_y or self.rect.y <= self.min_y:
             self.velocity[1] *= -1
+        return self.rect.y >= self.max_y
 
     def bounce(self):
         # Back it up TODO: necessary?
