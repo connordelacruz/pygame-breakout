@@ -18,10 +18,11 @@ C_BG = Colors.DARK_BLUE
 PADDLE_WIDTH = 100
 PADDLE_HEIGHT = 10
 POS_PADDLE_START = ((WINDOW_WIDTH - PADDLE_WIDTH) / 2, WINDOW_HEIGHT - 40)
-PADDLE_SPEED = 8
+PADDLE_SPEED = 5
 C_PADDLE = Colors.LIGHT_BLUE
 # Ball -------------------------------------------------------------------------
 BALL_SIZE = 10
+POS_BALL_START = ((WINDOW_WIDTH - BALL_SIZE) / 2, POS_PADDLE_START[1] - BALL_SIZE)
 C_BALL = Colors.WHITE
 # Bricks -----------------------------------------------------------------------
 C_BRICK_TOP = Colors.RED
@@ -35,6 +36,9 @@ UI_LINE_STROKE = 2
 C_UI = Colors.WHITE
 ui_font = pygame.font.Font(None, 34)
 game_over_font = pygame.font.Font(None, 74)
+# Playfield --------------------------------------------------------------------
+# Set top of playfield to just below UI
+PLAYFIELD_TOP_Y = UI_LINE_Y + UI_LINE_STROKE
 
 
 # PYGAME SETUP =================================================================
@@ -52,10 +56,8 @@ paddle.set_pos(POS_PADDLE_START)
 sprites.add(paddle)
 # Ball
 # TODO constants
-ball = Ball(Colors.WHITE, BALL_SIZE)
-ball.set_pos((345, 560))
-# So ball doesn't pass thru UI
-ball.set_playfield_limits(min_y=UI_LINE_Y + UI_LINE_STROKE)
+ball = Ball(Colors.WHITE, BALL_SIZE, POS_BALL_START,
+            min_y=PLAYFIELD_TOP_Y)
 sprites.add(ball)
 # Bricks
 bricks = pygame.sprite.Group()
@@ -86,7 +88,6 @@ while running:
         # Quit game
         if event.type == pygame.QUIT:
             running = False
-
     # Input Handlers -----------------------------------------------------------
     keys = pygame.key.get_pressed()
     # Quit on ESC
@@ -97,11 +98,8 @@ while running:
         paddle.move_left(PADDLE_SPEED)
     if keys[pygame.K_RIGHT]:
         paddle.move_right(PADDLE_SPEED)
-    # TODO DEBUG
-    if keys[pygame.K_b]:
-        bricks.empty()
-
     # Game Logic ---------------------------------------------------------------
+    # TODO: once objects store props, try to use those instead of constants whenever possible (e.g. paddle.width)
     # Update ball position, determine if ball hit bottom
     lose_life = ball.update()
     if lose_life:
@@ -110,11 +108,13 @@ while running:
     # Paddle/ball collision
     if pygame.sprite.collide_mask(ball, paddle):
         # TODO move width and height to paddle (allow for powerups)
-        diff = (paddle.rect.x + PADDLE_WIDTH / 2) - (ball.rect.x + BALL_SIZE / 2)
-        ball.h_bounce(paddle.rect.y - 1, diff)
+        # TODO this seems to be reversed?
+        diff = (paddle.rect.x + PADDLE_WIDTH / 2) - (ball.rect.x + ball.size / 2)
+        ball.h_bounce(paddle.rect.y - ball.size, diff)
     # Brick/ball collision
     for brick in pygame.sprite.spritecollide(ball, bricks, False):
-        ball.h_bounce(brick.rect.y + 1)
+        # TODO: v or h bounce depending on side?
+        ball.h_bounce(ball.rect.y)
         score_manager.add_points()
         brick.kill()
     if len(bricks) == 0:
@@ -155,7 +155,5 @@ while running:
     # Ticks --------------------------------------------------------------------
     clock.tick(FPS)
 
-# End Loop ---------------------------------------------------------------------
 pygame.quit()
-
 
