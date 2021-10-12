@@ -55,8 +55,8 @@ paddle = Paddle(C_PADDLE, PADDLE_WIDTH, PADDLE_HEIGHT)
 paddle.set_pos(POS_PADDLE_START)
 sprites.add(paddle)
 # Ball
-# TODO constants
-ball = Ball(Colors.WHITE, BALL_SIZE, POS_BALL_START,
+# TODO speed and initial direction
+ball = Ball(C_BALL, BALL_SIZE, POS_BALL_START,
             min_y=PLAYFIELD_TOP_Y)
 sprites.add(ball)
 # Bricks
@@ -107,10 +107,8 @@ while running:
         # TODO: move ball to starting position after pause
     # Paddle/ball collision
     if pygame.sprite.collide_mask(ball, paddle):
-        # TODO move width and height to paddle (allow for powerups)
-        # TODO this seems to be reversed?
-        diff = (paddle.rect.x + PADDLE_WIDTH / 2) - (ball.rect.x + ball.size / 2)
-        ball.h_bounce(paddle.rect.y - ball.size, diff)
+        diff = paddle.rect.centerx - ball.rect.centerx
+        ball.h_bounce(paddle.rect.y - ball.size - 1, diff)
     # Brick/ball collision
     for brick in pygame.sprite.spritecollide(ball, bricks, False):
         # TODO: v or h bounce depending on side?
@@ -130,7 +128,6 @@ while running:
     # Background
     screen.fill(C_BG)
     # UI border and text
-    # TODO move to sprite class?
     pygame.draw.line(screen, C_UI, [0, UI_LINE_Y], [WINDOW_WIDTH, UI_LINE_Y], UI_LINE_STROKE)
     score_text = ui_font.render(f'Score: {score_manager.score}', 1, C_UI)
     lives_text = ui_font.render(f'Lives: {score_manager.lives}', 1, C_UI)

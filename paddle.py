@@ -14,7 +14,7 @@ class Paddle(pygame.sprite.Sprite):
 
         # Initialize self.image
         self.image = pygame.Surface([width, height])
-        # Set transparency (TODO: is this necessary?)
+        # Set transparency
         self.image.fill(Colors.BLACK)
         self.image.set_colorkey(Colors.BLACK)
 

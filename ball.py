@@ -7,31 +7,25 @@ from colors import Colors
 class Ball(pygame.sprite.Sprite):
     """Ball object."""
 
-    # TODO take min/max x/y, starting position here
     def __init__(self, color, size, starting_pos,
+                 speed=6, starting_direction=200,
                  min_x=0, max_x=None, min_y=0, max_y=None):
         super().__init__()
         self.color = color
         self.size = size
         self.starting_pos = starting_pos
-
+        self.speed = speed
+        self.direction = starting_direction
         # Keep track of screen borders for position calulations
         self.screen_width, self.screen_height = pygame.display.get_surface().get_size()
         self.min_x = min_x
-        self.max_x = self.screen_width - size if max_x is None else max_x
+        self.max_x = max_x or self.screen_width - size
         self.min_y = min_y
-        self.max_y = self.screen_height - size if max_y is None else max_y
-
-        # TODO: parameterize
-        # Speed and direction
-        self.speed = 8
-        self.direction = 200
-
+        self.max_y = max_y or self.screen_height - size
         # Initialize self.image
         self.image = pygame.Surface([size, size])
         self.image.fill(Colors.BLACK)
         self.image.set_colorkey(Colors.BLACK)
-
         # Draw ball
         pygame.draw.rect(self.image, color, [0, 0, size, size])
         self.rect = self.image.get_rect()
@@ -44,16 +38,25 @@ class Ball(pygame.sprite.Sprite):
         self.rect.y = coords[1]
 
     def h_bounce(self, target_y, diff=0):
-        """Bounce off horizontal surface"""
-        # TODO doc params
+        """Bounce off horizontal surface.
+
+        :param target_y: New Y-coordinate to set for ball. Should be 1px
+            above/below the object we're bouncing off of
+        :param diff: (Default: 0) center of paddle - center of ball. Angle will
+            be adjusted based on how far to the left or right of the paddle
+            ball hits
+        """
         # TODO: don't allow for horizontal lines
         self.direction = (180 - self.direction) % 360
         self.direction -= diff
         self.rect.y = target_y
 
     def v_bounce(self, target_x):
-        """Bounce off vertical surface"""
-        # TODO doc params
+        """Bounce off vertical surface.
+
+        :param target_x: New X-coordinate to set for ball. Should be 1px
+            left/right of the object we're bouncing off of
+        """
         # TODO: don't allow for horizontal lines
         self.direction = (360 - self.direction) % 360
         self.rect.x = target_x
