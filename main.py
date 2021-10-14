@@ -7,39 +7,51 @@ from ball import Ball
 from brick import Brick
 from score_manager import ScoreManager
 
-
 # GLOBALS AND CONSTANTS ========================================================
 # Window and Rendering ---------------------------------------------------------
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 FPS = 60
-C_BG = Colors.DARK_BLUE
+BG_COLOR = Colors.BLACK
 # Paddle -----------------------------------------------------------------------
 PADDLE_WIDTH = 100
 PADDLE_HEIGHT = 10
-POS_PADDLE_START = ((WINDOW_WIDTH - PADDLE_WIDTH) / 2, WINDOW_HEIGHT - 40)
+PADDLE_STARTING_POS = ((WINDOW_WIDTH - PADDLE_WIDTH) / 2, WINDOW_HEIGHT - 40)
+# TODO: parameterize (or remove and use mouse 1:1)
 PADDLE_SPEED = 5
-C_PADDLE = Colors.LIGHT_BLUE
+PADDLE_COLOR = Colors.LIGHT_BLUE
 # Ball -------------------------------------------------------------------------
 BALL_SIZE = 10
-POS_BALL_START = ((WINDOW_WIDTH - BALL_SIZE) / 2, POS_PADDLE_START[1] - BALL_SIZE)
-C_BALL = Colors.WHITE
+BALL_STARTING_POS = ((WINDOW_WIDTH - BALL_SIZE) / 2, PADDLE_STARTING_POS[1] - BALL_SIZE)
+BALL_STARTING_DIRECTION = 200
+BALL_SPEED = 6
+BALL_COLOR = Colors.WHITE
 # Bricks -----------------------------------------------------------------------
-C_BRICK_TOP = Colors.RED
-C_BRICK_MID = Colors.ORANGE
-C_BRICK_BOT = Colors.YELLOW
+BRICK_ROWS = 5
+BRICKS_PER_ROW = 8
+BRICK_PADDING_X = 2
+BRICK_PADDING_TOP = 5
+BRICK_WIDTH = (WINDOW_WIDTH / BRICKS_PER_ROW) - 2 * BRICK_PADDING_X
+BRICK_HEIGHT = 30
+# Colors for each row, top to bottom
+BRICK_ROW_COLORS = [
+    Colors.RED,
+    Colors.ORANGE,
+    Colors.YELLOW,
+    Colors.GREEN,
+    Colors.BLUE,
+]
 # UI ---------------------------------------------------------------------------
-POS_SCORE = (20, 10)
-POS_LIVES = (650, 10)
+UI_SCORE_POS = (20, 10)
+UI_LIVES_POS = (650, 10)
 UI_LINE_Y = 38
 UI_LINE_STROKE = 2
-C_UI = Colors.WHITE
-ui_font = pygame.font.Font(None, 34)
-game_over_font = pygame.font.Font(None, 74)
+UI_COLOR = Colors.WHITE
+UI_FONT = pygame.font.Font(None, 34)
+GAME_OVER_FONT = pygame.font.Font(None, 74)
 # Playfield --------------------------------------------------------------------
 # Set top of playfield to just below UI
 PLAYFIELD_TOP_Y = UI_LINE_Y + UI_LINE_STROKE
-
 
 # PYGAME SETUP =================================================================
 # Window -----------------------------------------------------------------------
@@ -51,34 +63,27 @@ clock = pygame.time.Clock()
 # Global sprites list
 sprites = pygame.sprite.Group()
 # Paddle
-paddle = Paddle(C_PADDLE, PADDLE_WIDTH, PADDLE_HEIGHT)
-paddle.set_pos(POS_PADDLE_START)
+paddle = Paddle(PADDLE_COLOR, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_STARTING_POS)
 sprites.add(paddle)
 # Ball
-# TODO speed and initial direction
-ball = Ball(C_BALL, BALL_SIZE, POS_BALL_START,
+ball = Ball(BALL_COLOR, BALL_SIZE, BALL_STARTING_POS, BALL_STARTING_DIRECTION, BALL_SPEED,
             min_y=PLAYFIELD_TOP_Y)
 sprites.add(ball)
 # Bricks
 bricks = pygame.sprite.Group()
-# TODO constants
-for i in range(7):
-    brick = Brick(C_BRICK_TOP, 80, 30)
-    brick.set_pos((60 + i * 100, 60))
-    bricks.add(brick)
-for i in range(7):
-    brick = Brick(C_BRICK_MID, 80, 30)
-    brick.set_pos((60 + i * 100, 100))
-    bricks.add(brick)
-for i in range(7):
-    brick = Brick(C_BRICK_BOT, 80, 30)
-    brick.set_pos((60 + i * 100, 140))
-    bricks.add(brick)
+for r in range(BRICK_ROWS):
+    for b in range(BRICKS_PER_ROW):
+        brick = Brick(BRICK_ROW_COLORS[r], BRICK_WIDTH, BRICK_HEIGHT)
+        # x = b * (l_pad + r_pad + width) + l_pad
+        brick_x = b * (2 * BRICK_PADDING_X + BRICK_WIDTH) + BRICK_PADDING_X
+        # y = top_y + r * (t_pad + height) + t_pad
+        brick_y = PLAYFIELD_TOP_Y + r * (BRICK_PADDING_TOP + BRICK_HEIGHT) + BRICK_PADDING_TOP
+        brick.set_pos((brick_x, brick_y))
+        bricks.add(brick)
 sprites.add(bricks)
 
 # Object to keep track of score
 score_manager = ScoreManager(3)
-
 
 # MAIN LOOP ====================================================================
 running = True
@@ -116,7 +121,7 @@ while running:
         score_manager.add_points()
         brick.kill()
     if len(bricks) == 0:
-        win_text = game_over_font.render("STAGE CLEAR", 1, C_UI)
+        win_text = GAME_OVER_FONT.render("STAGE CLEAR", 1, UI_COLOR)
         # TODO: centering?
         screen.blit(win_text, (200, 300))
         pygame.display.flip()
@@ -126,13 +131,13 @@ while running:
 
     # Drawing ------------------------------------------------------------------
     # Background
-    screen.fill(C_BG)
+    screen.fill(BG_COLOR)
     # UI border and text
-    pygame.draw.line(screen, C_UI, [0, UI_LINE_Y], [WINDOW_WIDTH, UI_LINE_Y], UI_LINE_STROKE)
-    score_text = ui_font.render(f'Score: {score_manager.score}', 1, C_UI)
-    lives_text = ui_font.render(f'Lives: {score_manager.lives}', 1, C_UI)
-    screen.blit(score_text, POS_SCORE)
-    screen.blit(lives_text, POS_LIVES)
+    pygame.draw.line(screen, UI_COLOR, [0, UI_LINE_Y], [WINDOW_WIDTH, UI_LINE_Y], UI_LINE_STROKE)
+    score_text = UI_FONT.render(f'Score: {score_manager.score}', 1, UI_COLOR)
+    lives_text = UI_FONT.render(f'Lives: {score_manager.lives}', 1, UI_COLOR)
+    screen.blit(score_text, UI_SCORE_POS)
+    screen.blit(lives_text, UI_LIVES_POS)
     # Draw sprites
     sprites.draw(screen)
     # Render screen
@@ -141,7 +146,7 @@ while running:
     # Handle game over
     if score_manager.lives <= 0:
         # Show game over then exit
-        game_over_text = game_over_font.render('GAME OVER', 1, C_UI)
+        game_over_text = GAME_OVER_FONT.render('GAME OVER', 1, UI_COLOR)
         # TODO positioning?
         screen.blit(game_over_text, (250, 300))
         pygame.display.flip()

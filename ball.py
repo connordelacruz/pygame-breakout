@@ -7,15 +7,14 @@ from colors import Colors
 class Ball(pygame.sprite.Sprite):
     """Ball object."""
 
-    def __init__(self, color, size, starting_pos,
-                 speed=6, starting_direction=200,
+    def __init__(self, color, size, starting_pos, starting_direction, speed,
                  min_x=0, max_x=None, min_y=0, max_y=None):
         super().__init__()
         self.color = color
         self.size = size
         self.starting_pos = starting_pos
-        self.speed = speed
         self.direction = starting_direction
+        self.speed = speed
         # Keep track of screen borders for position calulations
         self.screen_width, self.screen_height = pygame.display.get_surface().get_size()
         self.min_x = min_x
@@ -26,14 +25,13 @@ class Ball(pygame.sprite.Sprite):
         self.image = pygame.Surface([size, size])
         self.image.fill(Colors.BLACK)
         self.image.set_colorkey(Colors.BLACK)
-        # Draw ball
+        # Initialize rect
         pygame.draw.rect(self.image, color, [0, 0, size, size])
         self.rect = self.image.get_rect()
-        # TODO: set center instead?
-        self.rect.x = starting_pos[0]
-        self.rect.y = starting_pos[1]
+        self.set_pos(starting_pos)
 
     def set_pos(self, coords):
+        # TODO: set center instead?
         self.rect.x = coords[0]
         self.rect.y = coords[1]
 
@@ -62,7 +60,10 @@ class Ball(pygame.sprite.Sprite):
         self.rect.x = target_x
 
     def update(self):
-        """Returns True if we hit the bottom"""
+        """Update ball position and direction.
+
+        :return: True if ball hit the bottom
+        """
         hit_bottom = False
         rad = math.radians(self.direction)
         # Calculate new position
