@@ -116,8 +116,7 @@ while running:
         ball.h_bounce(paddle.rect.y - ball.size - 1, diff)
     # Brick/ball collision
     for brick in pygame.sprite.spritecollide(ball, bricks, False):
-        # TODO: v or h bounce depending on side?
-        ball.h_bounce(ball.rect.y)
+        ball.handle_brick_collision(brick.rect)
         score_manager.add_points()
         brick.kill()
     if len(bricks) == 0:

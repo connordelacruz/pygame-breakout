@@ -26,12 +26,12 @@ class Ball(pygame.sprite.Sprite):
         self.image.fill(Colors.BLACK)
         self.image.set_colorkey(Colors.BLACK)
         # Initialize rect
-        pygame.draw.rect(self.image, color, [0, 0, size, size])
+        pygame.draw.circle(self.image, color, (size / 2, size / 2), size / 2)
         self.rect = self.image.get_rect()
         self.set_pos(starting_pos)
 
     def set_pos(self, coords):
-        # TODO: set center instead?
+        # TODO: set center instead (for all x/y assignments)
         self.rect.x = coords[0]
         self.rect.y = coords[1]
 
@@ -58,6 +58,32 @@ class Ball(pygame.sprite.Sprite):
         # TODO: don't allow for horizontal lines
         self.direction = (360 - self.direction) % 360
         self.rect.x = target_x
+
+    def handle_brick_collision(self, brick_rect):
+        """Bounce the ball based on which side of a brick we've collided with.
+
+        Based on edge calculations from this sketch:
+        https://openprocessing.org/sketch/533102/
+
+        :param brick_rect: The Rect object of the brick we've collided with
+        """
+        # Figure out which edge we've collided with
+        is_horizontal_edge = None
+        bounce_side_coords = None
+        if self.rect.centerx <= brick_rect.left:
+            is_horizontal_edge = False
+            bounce_side_coords = brick_rect.left
+        elif self.rect.centerx >= brick_rect.right:
+            is_horizontal_edge = False
+            bounce_side_coords = brick_rect.right
+        if self.rect.centery <= brick_rect.top:
+            is_horizontal_edge = True
+            bounce_side_coords = brick_rect.top
+        elif self.rect.centery >= brick_rect.bottom:
+            is_horizontal_edge = True
+            bounce_side_coords = brick_rect.bottom
+        bounce_method = self.h_bounce if is_horizontal_edge else self.v_bounce
+        bounce_method(bounce_side_coords)
 
     def update(self):
         """Update ball position and direction.
