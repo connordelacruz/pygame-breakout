@@ -15,7 +15,7 @@ class Ball(pygame.sprite.Sprite):
         self.starting_pos = starting_pos
         self.direction = starting_direction
         self.speed = speed
-        # Keep track of screen borders for position calulations
+        # Keep track of screen borders for position calculations
         self.screen_width, self.screen_height = pygame.display.get_surface().get_size()
         self.min_x = min_x
         self.max_x = max_x or self.screen_width - size

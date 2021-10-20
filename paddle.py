@@ -28,6 +28,9 @@ class Paddle(pygame.sprite.Sprite):
         self.rect.x = coords[0]
         self.rect.y = coords[1]
 
+    def set_center_x(self, new_x):
+        self.rect.centerx = new_x
+
     def move_left(self, amount):
         self.rect.x -= amount
         # Don't go past screen border

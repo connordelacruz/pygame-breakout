@@ -15,16 +15,14 @@ FPS = 60
 BG_COLOR = Colors.BLACK
 # Paddle -----------------------------------------------------------------------
 PADDLE_WIDTH = 100
-PADDLE_HEIGHT = 10
+PADDLE_HEIGHT = 20
 PADDLE_STARTING_POS = ((WINDOW_WIDTH - PADDLE_WIDTH) / 2, WINDOW_HEIGHT - 40)
-# TODO: parameterize (or remove and use mouse 1:1)
-PADDLE_SPEED = 5
 PADDLE_COLOR = Colors.LIGHT_BLUE
 # Ball -------------------------------------------------------------------------
 BALL_SIZE = 10
 BALL_STARTING_POS = ((WINDOW_WIDTH - BALL_SIZE) / 2, PADDLE_STARTING_POS[1] - BALL_SIZE)
 BALL_STARTING_DIRECTION = 200
-BALL_SPEED = 6
+BALL_SPEED = 7
 BALL_COLOR = Colors.WHITE
 # Bricks -----------------------------------------------------------------------
 BRICK_ROWS = 5
@@ -94,17 +92,14 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     # Input Handlers -----------------------------------------------------------
+    # TODO: when starting or after dying, start game w/ click
     keys = pygame.key.get_pressed()
     # Quit on ESC
     if keys[pygame.K_ESCAPE]:
         running = False
-    # Paddle controls
-    if keys[pygame.K_LEFT]:
-        paddle.move_left(PADDLE_SPEED)
-    if keys[pygame.K_RIGHT]:
-        paddle.move_right(PADDLE_SPEED)
+    # Paddle controls (mouse)
+    paddle.set_center_x(pygame.mouse.get_pos()[0])
     # Game Logic ---------------------------------------------------------------
-    # TODO: once objects store props, try to use those instead of constants whenever possible (e.g. paddle.width)
     # Update ball position, determine if ball hit bottom
     lose_life = ball.update()
     if lose_life:
