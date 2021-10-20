@@ -35,6 +35,23 @@ class Ball(pygame.sprite.Sprite):
         self.rect.x = coords[0]
         self.rect.y = coords[1]
 
+    def set_direction(self, new_direction):
+        """Set direction angle.
+
+        If new_direction is close to a horizontal angle, it will be tweaked
+        to avoid soft locking the game.
+
+        :param new_direction: The new direction of the ball
+        """
+        # TODO: move % 360 here
+        # If the angle would cause a horizontal (or near-horizontal) angle,
+        # adjust the new direction to be angled slightly upwards
+        if 80 <= new_direction <= 100:
+            new_direction -= 30
+        elif 260 <= new_direction <= 280:
+            new_direction += 30
+        self.direction = new_direction
+
     def h_bounce(self, target_y, diff=0):
         """Bounce off horizontal surface.
 
@@ -44,9 +61,7 @@ class Ball(pygame.sprite.Sprite):
             be adjusted based on how far to the left or right of the paddle
             ball hits
         """
-        # TODO: don't allow for horizontal lines
-        self.direction = (180 - self.direction) % 360
-        self.direction -= diff
+        self.set_direction(((180 - self.direction - diff) % 360))
         self.rect.y = target_y
 
     def v_bounce(self, target_x):
@@ -55,8 +70,7 @@ class Ball(pygame.sprite.Sprite):
         :param target_x: New X-coordinate to set for ball. Should be 1px
             left/right of the object we're bouncing off of
         """
-        # TODO: don't allow for horizontal lines
-        self.direction = (360 - self.direction) % 360
+        self.set_direction((360 - self.direction) % 360)
         self.rect.x = target_x
 
     def handle_brick_collision(self, brick_rect):
@@ -68,8 +82,8 @@ class Ball(pygame.sprite.Sprite):
         :param brick_rect: The Rect object of the brick we've collided with
         """
         # Figure out which edge we've collided with
-        is_horizontal_edge = None
-        bounce_side_coords = None
+        is_horizontal_edge = True
+        bounce_side_coords = self.rect.y
         if self.rect.centerx <= brick_rect.left:
             is_horizontal_edge = False
             bounce_side_coords = brick_rect.left

@@ -83,7 +83,7 @@ for r in range(BRICK_ROWS):
 sprites.add(bricks)
 
 # Object to keep track of score
-score_manager = ScoreManager(3)
+score_manager = ScoreManager(5)
 
 # MAIN LOOP ====================================================================
 running = True
