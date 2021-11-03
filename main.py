@@ -13,6 +13,8 @@ WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 FPS = 60
 BG_COLOR = Colors.BLACK
+# Scoring ----------------------------------------------------------------------
+STARTING_LIVES = 5
 # Paddle -----------------------------------------------------------------------
 PADDLE_WIDTH = 100
 PADDLE_HEIGHT = 20
@@ -27,6 +29,7 @@ BALL_COLOR = Colors.WHITE
 # Bricks -----------------------------------------------------------------------
 BRICK_ROWS = 5
 BRICKS_PER_ROW = 8
+# TODO: collisison issues when ball is in between 2 bricks, treat padding area as part of specific brick?
 BRICK_PADDING_X = 2
 BRICK_PADDING_TOP = 5
 BRICK_WIDTH = (WINDOW_WIDTH / BRICKS_PER_ROW) - 2 * BRICK_PADDING_X
@@ -51,6 +54,55 @@ GAME_OVER_FONT = pygame.font.Font(None, 74)
 # Set top of playfield to just below UI
 PLAYFIELD_TOP_Y = UI_LINE_Y + UI_LINE_STROKE
 
+# GAME OBJECTS =================================================================
+# Declaring here to be instantiated in setup_game() ----------------------------
+# Global sprites list
+sprites = None
+# Paddle
+paddle = None
+# Ball
+ball = None
+# Sprites list of all bricks
+bricks = None
+# Object to keep track of score/lives
+score_manager = None
+
+# HELPERS ======================================================================
+
+def spawn_ball():
+    """Initialize ball and add to global sprites list."""
+    global ball, sprites
+    ball = Ball(BALL_COLOR, BALL_SIZE, BALL_STARTING_POS, BALL_STARTING_DIRECTION, BALL_SPEED,
+                min_y=PLAYFIELD_TOP_Y)
+    sprites.add(ball)
+
+
+def setup_game():
+    """Setup a fresh game (initialize all sprites, set score to 0, lives to 5)"""
+    global ball, paddle, bricks, sprites, score_manager
+    # Setup global sprites list
+    sprites = pygame.sprite.Group()
+    # Ball not spawned until player clicks
+    ball = None
+    # Paddle
+    paddle = Paddle(PADDLE_COLOR, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_STARTING_POS)
+    sprites.add(paddle)
+    # Bricks
+    bricks = pygame.sprite.Group()
+    for r in range(BRICK_ROWS):
+        for b in range(BRICKS_PER_ROW):
+            brick = Brick(BRICK_ROW_COLORS[r], BRICK_WIDTH, BRICK_HEIGHT)
+            # x = b * (l_pad + r_pad + width) + l_pad
+            brick_x = b * (2 * BRICK_PADDING_X + BRICK_WIDTH) + BRICK_PADDING_X
+            # y = top_y + r * (t_pad + height) + t_pad
+            brick_y = PLAYFIELD_TOP_Y + r * (BRICK_PADDING_TOP + BRICK_HEIGHT) + BRICK_PADDING_TOP
+            brick.set_pos((brick_x, brick_y))
+            bricks.add(brick)
+    sprites.add(bricks)
+    # Object to keep track of score
+    score_manager = ScoreManager(STARTING_LIVES)
+
+
 # PYGAME SETUP =================================================================
 # Window -----------------------------------------------------------------------
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -58,28 +110,7 @@ pygame.display.set_caption('Breakout')
 # Clock ------------------------------------------------------------------------
 clock = pygame.time.Clock()
 # Game Objects -----------------------------------------------------------------
-# Global sprites list
-sprites = pygame.sprite.Group()
-# Paddle
-paddle = Paddle(PADDLE_COLOR, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_STARTING_POS)
-sprites.add(paddle)
-# Ball
-# Initialize empty, will be set to instance of Ball when spawn_ball() is called
-ball = None
-# Bricks
-bricks = pygame.sprite.Group()
-for r in range(BRICK_ROWS):
-    for b in range(BRICKS_PER_ROW):
-        brick = Brick(BRICK_ROW_COLORS[r], BRICK_WIDTH, BRICK_HEIGHT)
-        # x = b * (l_pad + r_pad + width) + l_pad
-        brick_x = b * (2 * BRICK_PADDING_X + BRICK_WIDTH) + BRICK_PADDING_X
-        # y = top_y + r * (t_pad + height) + t_pad
-        brick_y = PLAYFIELD_TOP_Y + r * (BRICK_PADDING_TOP + BRICK_HEIGHT) + BRICK_PADDING_TOP
-        brick.set_pos((brick_x, brick_y))
-        bricks.add(brick)
-sprites.add(bricks)
-# Object to keep track of score
-score_manager = ScoreManager(5)
+setup_game()
 
 # MAIN LOOP ====================================================================
 # Game continues as long as this is True
@@ -100,9 +131,7 @@ while running:
     mouse_buttons = pygame.mouse.get_pressed(3)
     # Spawn ball on click if not already in play
     if ball is None and mouse_buttons[0]:
-        ball = Ball(BALL_COLOR, BALL_SIZE, BALL_STARTING_POS, BALL_STARTING_DIRECTION, BALL_SPEED,
-                    min_y=PLAYFIELD_TOP_Y)
-        sprites.add(ball)
+        spawn_ball()
     # Paddle controls (mouse position)
     paddle.set_center_x(pygame.mouse.get_pos()[0])
     # Game Logic ---------------------------------------------------------------
@@ -119,13 +148,15 @@ while running:
             score_manager.add_points()
             brick.kill()
         if len(bricks) == 0:
+            # TODO: extract common stuff w/ game over to helper function
             win_text = GAME_OVER_FONT.render('STAGE CLEAR', True, UI_COLOR)
             # TODO: centering?
             screen.blit(win_text, (200, 300))
             pygame.display.flip()
+            # TODO: no wait
             pygame.time.wait(3000)
-            # TODO: reset game instead
-            running = False
+            # Reset game
+            setup_game()
         if lose_life:
             ball.kill()
             ball = None
@@ -149,12 +180,11 @@ while running:
     if score_manager.lives <= 0:
         # Show game over then exit
         game_over_text = GAME_OVER_FONT.render('GAME OVER', True, UI_COLOR)
-        # TODO positioning?
         screen.blit(game_over_text, (250, 300))
         pygame.display.flip()
         pygame.time.wait(3000)
-        # TODO: reset game instead
-        running = False
+        # Reset game
+        setup_game()
 
     # Ticks --------------------------------------------------------------------
     clock.tick(FPS)
