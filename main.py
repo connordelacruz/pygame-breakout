@@ -49,13 +49,14 @@ UI_LINE_Y = 38
 UI_LINE_STROKE = 2
 UI_COLOR = Colors.WHITE
 UI_FONT = pygame.font.Font(None, 34)
-GAME_OVER_FONT = pygame.font.Font(None, 74)
+LEVEL_END_FONT = pygame.font.Font(None, 74)
 # Playfield --------------------------------------------------------------------
 # Set top of playfield to just below UI
 PLAYFIELD_TOP_Y = UI_LINE_Y + UI_LINE_STROKE
 
-# GAME OBJECTS =================================================================
-# Declaring here to be instantiated in setup_game() ----------------------------
+# PYGAME SETUP =================================================================
+# Game Objects -----------------------------------------------------------------
+# (Declaring here to be instantiated in setup_game())
 # Global sprites list
 sprites = None
 # Paddle
@@ -66,6 +67,12 @@ ball = None
 bricks = None
 # Object to keep track of score/lives
 score_manager = None
+# Window -----------------------------------------------------------------------
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption('Breakout')
+# Clock ------------------------------------------------------------------------
+clock = pygame.time.Clock()
+
 
 # HELPERS ======================================================================
 
@@ -103,16 +110,24 @@ def setup_game():
     score_manager = ScoreManager(STARTING_LIVES)
 
 
-# PYGAME SETUP =================================================================
-# Window -----------------------------------------------------------------------
-screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption('Breakout')
-# Clock ------------------------------------------------------------------------
-clock = pygame.time.Clock()
-# Game Objects -----------------------------------------------------------------
-setup_game()
+def finish_level(text_to_display, reset_game=True, wait_time=3000):
+    """Show text in the center of the screen, pause for a bit, then optionally
+    restart game.
+    """
+    finish_text = LEVEL_END_FONT.render(text_to_display, True, UI_COLOR)
+    # TODO: centering?
+    screen.blit(finish_text, (200, 300))
+    pygame.display.flip()
+    # TODO: no wait?
+    if wait_time:
+        pygame.time.wait(3000)
+    # Reset game
+    if reset_game:
+        setup_game()
+
 
 # MAIN LOOP ====================================================================
+setup_game()
 # Game continues as long as this is True
 running = True
 while running:
@@ -149,14 +164,7 @@ while running:
             brick.kill()
         if len(bricks) == 0:
             # TODO: extract common stuff w/ game over to helper function
-            win_text = GAME_OVER_FONT.render('STAGE CLEAR', True, UI_COLOR)
-            # TODO: centering?
-            screen.blit(win_text, (200, 300))
-            pygame.display.flip()
-            # TODO: no wait
-            pygame.time.wait(3000)
-            # Reset game
-            setup_game()
+            finish_level('STAGE CLEAR')
         if lose_life:
             ball.kill()
             ball = None
@@ -179,12 +187,7 @@ while running:
     # Handle game over
     if score_manager.lives <= 0:
         # Show game over then exit
-        game_over_text = GAME_OVER_FONT.render('GAME OVER', True, UI_COLOR)
-        screen.blit(game_over_text, (250, 300))
-        pygame.display.flip()
-        pygame.time.wait(3000)
-        # Reset game
-        setup_game()
+        finish_level('GAME OVER')
 
     # Ticks --------------------------------------------------------------------
     clock.tick(FPS)
