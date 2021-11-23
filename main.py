@@ -158,8 +158,11 @@ while running:
             diff = paddle.rect.centerx - ball.rect.centerx
             ball.h_bounce(paddle.rect.y - ball.size - 1, diff)
         # Brick/ball collision
-        for brick in pygame.sprite.spritecollide(ball, bricks, False):
-            ball.handle_brick_collision(brick.rect)
+        for i, brick in enumerate(pygame.sprite.spritecollide(ball, bricks, False)):
+            # To avoid bug where ball direction changes twice on 1 axis (causing it to keep going the same way),
+            # only bounce once during this frame.
+            if i < 1:
+                ball.handle_brick_collision(brick.rect)
             score_manager.add_points()
             brick.kill()
         if len(bricks) == 0:

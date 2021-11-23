@@ -44,6 +44,7 @@ class Ball(pygame.sprite.Sprite):
         :param new_direction: The new direction of the ball
         """
         # TODO: move % 360 here
+        # TODO: adjust threshold to keep angle from getting too horizontal (causing boring wall-to-wall bounces)
         # If the angle would cause a horizontal (or near-horizontal) angle,
         # adjust the new direction to be angled slightly upwards
         if 80 <= new_direction <= 100:
