@@ -10,6 +10,7 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self, color, size, starting_pos, starting_direction, speed,
                  min_x=0, max_x=None, min_y=0, max_y=None):
         super().__init__()
+        # TODO: are these utilized?
         self.color = color
         self.size = size
         self.starting_pos = starting_pos
@@ -43,7 +44,6 @@ class Ball(pygame.sprite.Sprite):
 
         :param new_direction: The new direction of the ball
         """
-        # TODO: move % 360 here
         # TODO: adjust threshold to keep angle from getting too horizontal (causing boring wall-to-wall bounces)
         # If the angle would cause a horizontal (or near-horizontal) angle,
         # adjust the new direction to be angled slightly upwards
@@ -51,7 +51,7 @@ class Ball(pygame.sprite.Sprite):
             new_direction -= 30
         elif 260 <= new_direction <= 280:
             new_direction += 30
-        self.direction = new_direction
+        self.direction = new_direction % 360
 
     def h_bounce(self, target_y, diff=0):
         """Bounce off horizontal surface.
@@ -62,7 +62,7 @@ class Ball(pygame.sprite.Sprite):
             be adjusted based on how far to the left or right of the paddle
             ball hits
         """
-        self.set_direction(((180 - self.direction - diff) % 360))
+        self.set_direction((180 - self.direction - diff))
         self.rect.y = target_y
 
     def v_bounce(self, target_x):
@@ -71,7 +71,7 @@ class Ball(pygame.sprite.Sprite):
         :param target_x: New X-coordinate to set for ball. Should be 1px
             left/right of the object we're bouncing off of
         """
-        self.set_direction((360 - self.direction) % 360)
+        self.set_direction(360 - self.direction)
         self.rect.x = target_x
 
     def handle_brick_collision(self, brick_rect):

@@ -29,7 +29,6 @@ BALL_COLOR = Colors.WHITE
 # Bricks -----------------------------------------------------------------------
 BRICK_ROWS = 5
 BRICKS_PER_ROW = 8
-# TODO: collisison issues when ball is in between 2 bricks, treat padding area as part of specific brick?
 BRICK_PADDING_X = 2
 BRICK_PADDING_TOP = 5
 BRICK_WIDTH = (WINDOW_WIDTH / BRICKS_PER_ROW) - 2 * BRICK_PADDING_X
@@ -43,13 +42,18 @@ BRICK_ROW_COLORS = [
     Colors.BLUE,
 ]
 # UI ---------------------------------------------------------------------------
-UI_SCORE_POS = (20, 10)
-UI_LIVES_POS = (650, 10)
-UI_LINE_Y = 38
-UI_LINE_STROKE = 2
+# General
 UI_COLOR = Colors.WHITE
 UI_FONT = pygame.font.Font(None, 34)
-LEVEL_END_FONT = pygame.font.Font(None, 74)
+# Score/Lives
+UI_SCORE_POS = (20, 10)
+UI_LIVES_POS = (650, 10)
+# Top UI divider line
+UI_LINE_Y = 38
+UI_LINE_STROKE = 2
+# Level complete text
+LEVEL_END_TEXT_FONT = pygame.font.Font(None, 74)
+LEVEL_END_TEXT_CENTER_POS = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
 # Playfield --------------------------------------------------------------------
 # Set top of playfield to just below UI
 PLAYFIELD_TOP_Y = UI_LINE_Y + UI_LINE_STROKE
@@ -98,12 +102,11 @@ def setup_game():
     bricks = pygame.sprite.Group()
     for r in range(BRICK_ROWS):
         for b in range(BRICKS_PER_ROW):
-            brick = Brick(BRICK_ROW_COLORS[r], BRICK_WIDTH, BRICK_HEIGHT)
             # x = b * (l_pad + r_pad + width) + l_pad
             brick_x = b * (2 * BRICK_PADDING_X + BRICK_WIDTH) + BRICK_PADDING_X
             # y = top_y + r * (t_pad + height) + t_pad
             brick_y = PLAYFIELD_TOP_Y + r * (BRICK_PADDING_TOP + BRICK_HEIGHT) + BRICK_PADDING_TOP
-            brick.set_pos((brick_x, brick_y))
+            brick = Brick(BRICK_ROW_COLORS[r], BRICK_WIDTH, BRICK_HEIGHT, (brick_x, brick_y))
             bricks.add(brick)
     sprites.add(bricks)
     # Object to keep track of score
@@ -114,9 +117,9 @@ def finish_level(text_to_display, reset_game=True, wait_time=3000):
     """Show text in the center of the screen, pause for a bit, then optionally
     restart game.
     """
-    finish_text = LEVEL_END_FONT.render(text_to_display, True, UI_COLOR)
-    # TODO: centering?
-    screen.blit(finish_text, (200, 300))
+    finish_text = LEVEL_END_TEXT_FONT.render(text_to_display, True, UI_COLOR)
+    finish_text_rect = finish_text.get_rect(center=LEVEL_END_TEXT_CENTER_POS)
+    screen.blit(finish_text, finish_text_rect)
     pygame.display.flip()
     # TODO: no wait?
     if wait_time:
@@ -166,7 +169,6 @@ while running:
             score_manager.add_points()
             brick.kill()
         if len(bricks) == 0:
-            # TODO: extract common stuff w/ game over to helper function
             finish_level('STAGE CLEAR')
         if lose_life:
             ball.kill()
@@ -196,4 +198,3 @@ while running:
     clock.tick(FPS)
 
 pygame.quit()
-

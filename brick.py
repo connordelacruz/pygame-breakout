@@ -5,8 +5,7 @@ from colors import Colors
 class Brick(pygame.sprite.Sprite):
     """Brick object."""
 
-    # TODO: starting_pos
-    def __init__(self, color, width, height):
+    def __init__(self, color, width, height, starting_pos):
         super().__init__()
         # Initialize self.image
         self.image = pygame.Surface([width, height])
@@ -15,6 +14,7 @@ class Brick(pygame.sprite.Sprite):
         # Initialize rect
         pygame.draw.rect(self.image, color, [0, 0, width, height])
         self.rect = self.image.get_rect()
+        self.set_pos(starting_pos)
 
     def set_pos(self, coords):
         self.rect.x = coords[0]
